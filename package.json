@@ -1,0 +1,22 @@
+{
+  "name": "com.falkolab.rateme",
+  "version": "1.0.0",
+  "description": "Feedback reminder for your application",
+  "main": "./index.js",
+  "titaniumManifest": {
+    "name": "Ti.RateMe",
+    "moduleid": "com.falkolab.rateme",
+    "guid": "FBC946DC-36A7-49EB-9F00-1AB866EB4235"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "titaniumifier",
+    "titanium",
+    "rate",
+    "feedback"
+  ],
+  "author": "Andrey Tkachenko aka falkolab",
+  "license": "MIT"
+}
