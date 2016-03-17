@@ -79,6 +79,10 @@ Go to app store rate page from app menu:
 
     require('com.falkolab.rateme').rate();
 
+## Changelog
+
+* 1.0.1 - fix for launch counter
+
 ## License
 
 MIT

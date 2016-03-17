@@ -70,6 +70,8 @@ exports.init = function(opts) {
 
         if(this.getLaunchesUntilPrompt() === 0) {
             Ti.App.Properties.setInt(LAUNCH_COUNTER_KEY, launchesUntilPrompt);
+            //this launch
+            decrementLauchCounter();
         }
     }
 
@@ -225,6 +227,7 @@ function tick() {
     timeoutValue = Math.max(0, timeoutValue - timerInterval);
     Ti.App.Properties.setInt(USAGE_TIMEOUT_KEY, timeoutValue);
     if(timeoutValue === 0) {
+        Ti.API.debug(TAG, 'by timer');
         showReminderPrompt();
     }
 }
@@ -282,12 +285,15 @@ exports.showRateDialog = function() {
 	dialog.show();
 };
 
-(function decrementLauchCounter() {
-    var counter = Ti.App.Properties.getInt(LAUNCH_COUNTER_KEY, 0);
+function decrementLauchCounter() {
+    var counter = Ti.App.Properties.getInt(LAUNCH_COUNTER_KEY);
     if(counter) Ti.App.Properties.setInt(LAUNCH_COUNTER_KEY, --counter);
 
     if(!exports.isOff() && counter === 0) {
         // delay for window open
+        Ti.API.debug(TAG, 'by launch counter');
         _.delay(showReminderPrompt, 2000);
     }
-})();
+}
+
+decrementLauchCounter();
