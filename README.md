@@ -30,6 +30,7 @@ With this module you can track launch count and time until prompt user for feedb
         * `opts.launchesUntilPrompt`: `number` - app launch times before show reminder dialog.
         * `opts.timerInterval`: `number` - internal timer period in seconds.
         * `opts.showIfAppHasCrashed`: `bool` - whether or not to show reminder dialog if app was crashed before.
+        * `opts.appId`: `string` - application id. `Ti.App.id` for Android or id from App Store for iOS.
 * **reset** - reset reminder to initial state.
 * **resetCounters** - reset counters only to initial state.
 * **isOff** - is user already done rate or rejected it.

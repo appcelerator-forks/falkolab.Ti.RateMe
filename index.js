@@ -18,6 +18,7 @@ var TAG = "com.falkolab.rateme",
     timeUntilPrompt = 0, // seconds
     launchesUntilPrompt = 0, // run times of app
     showIfAppHasCrashed = true,
+    appId,
 
     timerInterval = 60, // seconds
     _timer,
@@ -29,6 +30,7 @@ Ti.App.addEventListener('uncaughtException', function() {
 
 if(Titanium.Platform.osname == 'android') {
     exports.storeName = 'Google Play';
+    appId = Ti.App.id; // default value
 } else if(Titanium.Platform.osname == 'iphone') {
     exports.storeName = 'App Store';
 } else {
@@ -42,6 +44,7 @@ if(Titanium.Platform.osname == 'android') {
  * @param {number} opts.timeUntilPrompt app run time in seconds before show reminder dialog.
  * @param {number} opts.launchesUntilPrompt app launch times before show reminder dialog.
  * @param {number} opts.timerInterval internal timer period in seconds.
+ * @param {string} opts.appId application id. `Ti.App.id` for Android or id from App Store for iOS.
  * @param {bool} opts.showIfAppHasCrashed whether or not to show reminder dialog if app was crashed before.
  */
 exports.init = function(opts) {
@@ -55,6 +58,17 @@ exports.init = function(opts) {
 
     if(!_.isUndefined(opts.showIfAppHasCrashed)) {
         showIfAppHasCrashed = opts.showIfAppHasCrashed;
+    }
+
+    if(opts.appId) {
+        appId = opts.appId;
+        if(Ti.Platform.name == 'iPhone OS' && appId.lastIndexOf('id', 0) === 0) {
+            appId = appId.substring(2);
+        }
+    }
+
+    if(!appId) {
+        throw "Unknown app store id!";
     }
 
     // app usage timeout in minutes
@@ -99,8 +113,17 @@ exports.reset = function() {
  * Reset counters only to initial state
  */
 exports.resetCounters = function() {
-    Ti.App.Properties.setInt(USAGE_TIMEOUT_KEY, timeUntilPrompt);
-    Ti.App.Properties.setInt(LAUNCH_COUNTER_KEY, launchesUntilPrompt);
+    if(_.isUndefined(timeUntilPrompt)) {
+        Ti.App.Properties.removeProperty(USAGE_TIMEOUT_KEY);
+    } else {
+        Ti.App.Properties.setInt(USAGE_TIMEOUT_KEY, timeUntilPrompt);
+    }
+
+    if(_.isUndefined(launchesUntilPrompt)) {
+        Ti.App.Properties.removeProperty(LAUNCH_COUNTER_KEY);
+    } else {
+        Ti.App.Properties.setInt(LAUNCH_COUNTER_KEY, launchesUntilPrompt);
+    }
 };
 
 /**
@@ -146,7 +169,7 @@ exports.rate = function() {
     if( Titanium.Platform.osname == 'android' ){
         var intent, url;
         try {
-            url = "market://details?id=" + Ti.App.id;
+            url = "market://details?id=" + appId;
             // To count with Play market backstack, After pressing back button,
             // to taken back to our application, we need to add following flags to intent.
             var flags = Ti.Android.FLAG_ACTIVITY_NO_HISTORY | Ti.Android.FLAG_ACTIVITY_MULTIPLE_TASK |
@@ -162,7 +185,7 @@ exports.rate = function() {
             });
             Ti.Android.currentActivity.startActivity(intent);
         } catch(e) {
-            url = "https://play.google.com/store/apps/details?id=" + Ti.App.id;
+            url = "https://play.google.com/store/apps/details?id=" + appId;
             Ti.API.debug(TAG, 'Use failback rate url:', url);
             intent = Ti.Android.createIntent({
                 action: Ti.Android.ACTION_VIEW,
@@ -173,7 +196,7 @@ exports.rate = function() {
             try {
                 Ti.Android.currentActivity.startActivity(intent);
             } catch(e) {
-                url = "market://details?id=" + Ti.App.id;
+                url = "market://details?id=" + appId;
                 Ti.API.debug(TAG, 'Use failback rate url:', url);
                 Ti.Platform.openURL(url);
             }
@@ -181,9 +204,9 @@ exports.rate = function() {
     // detect iphone and ipad devices
     } else {
         if (Ti.Platform.version < 7) {
-            Ti.Platform.openURL("itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=" + Ti.App.id);
+            Ti.Platform.openURL("itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=" + appId);
         } else {
-            Ti.Platform.openURL("itms-apps://itunes.apple.com/app/id" + Ti.App.id);
+            Ti.Platform.openURL("itms-apps://itunes.apple.com/app/id" + appId);
         }
     }
 };
